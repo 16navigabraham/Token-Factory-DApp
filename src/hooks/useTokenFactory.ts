@@ -117,7 +117,7 @@ export const useTokenFactory = () => {
       return receipt;
     } catch (error) {
       console.error('Error creating token:', error);
-      toast.error('Failed to create token', { id: 'create' });
+      toast.error('Failed to create your token', { id: 'create' });
     } finally {
       setLoading(false);
     }

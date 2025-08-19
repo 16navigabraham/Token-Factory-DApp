@@ -10,17 +10,17 @@ function App() {
         toastOptions={{
           duration: 4000,
           style: {
-            background: '#363636',
+            background: '#5f4a4aff',
             color: '#fff',
           },
           success: {
             style: {
-              background: '#10b981',
+              background: '#195981ffff',
             },
           },
           error: {
             style: {
-              background: '#ef4444',
+              background: '#653131ff',
             },
           },
         }}
