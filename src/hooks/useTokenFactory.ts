@@ -16,40 +16,32 @@ interface TokenInfo {
 }
 
 export const useTokenFactory = () => {
-  const [provider, setProvider] = useState<BrowserProvider | null>(null);
-  const [signer, setSigner] = useState<ethers.Signer | null>(null);
   const [contract, setContract] = useState<Contract | null>(null);
-  const [account, setAccount] = useState<string>('');
-  const [chainId, setChainId] = useState<string>('');
   const [userTokens, setUserTokens] = useState<TokenInfo[]>([]);
   const [factoryStats, setFactoryStats] = useState({ totalTokens: 0, totalCreators: 0, isPaused: false });
   const [loading, setLoading] = useState(false);
 
+  const { address: account } = useAccount();
+  const { chainId } = useNetwork();
+  const { connect } = useConnect();
+  const { data: walletClient } = useWalletClient();
+  const provider = usePublicClient();
+
   const connectWallet = async () => {
     try {
-      if (!window.ethereum) {
-        toast.error('Please install MetaMask!');
-        return;
-      }
+      await connect();
+      toast.success('Wallet connected!');
 
-      const provider = new BrowserProvider(window.ethereum);
-      const accounts = await provider.send('eth_requestAccounts', []);
-      const signer = await provider.getSigner();
-      const network = await provider.getNetwork();
-      const chainId = '0x' + network.chainId.toString(16);
-
-      setProvider(provider);
-      setSigner(signer);
-      setAccount(accounts[0]);
-      setChainId(chainId);
-
-      const factoryAddress = FACTORY_ADDRESSES[chainId as keyof typeof FACTORY_ADDRESSES];
-      if (factoryAddress) {
-        const contract = new Contract(factoryAddress, FACTORY_ABI, signer);
-        setContract(contract);
-        toast.success('Wallet connected!');
-      } else {
-        toast.error('Please switch to Base Sepolia or Base Mainnet');
+      if (walletClient && chainId) {
+        const chainIdHex = '0x' + chainId.toString(16);
+        const factoryAddress = FACTORY_ADDRESSES[chainIdHex as keyof typeof FACTORY_ADDRESSES];
+        
+        if (factoryAddress) {
+          const contract = new Contract(factoryAddress, FACTORY_ABI, walletClient);
+          setContract(contract);
+        } else {
+          toast.error('Please switch to Base Sepolia or Base Mainnet');
+        }
       }
     } catch (error) {
       console.error('Connection error:', error);
